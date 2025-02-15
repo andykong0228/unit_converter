@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Unit Converter</h2>
+
+        <!-- Tab Buttons -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('length')">Length</button>
+            <button class="tab-button" onclick="switchTab('weight')">Weight</button>
+            <button class="tab-button" onclick="switchTab('temperature')">Temperature</button>
+            <button class="tab-button" onclick="switchTab('speed')">Speed</button>
+            <button class="tab-button" onclick="switchTab('area')">Area</button>
+            <button class="tab-button" onclick="switchTab('volume')">Volume</button>
+        </div>
+
+        <!-- Conversion Form -->
+        <div id="conversion-section">
+            <label for="input-value">Enter Value:</label>
+            <input type="number" id="input-value" placeholder="Enter value">
+
+            <label for="from-unit">From:</label>
+            <select id="from-unit"></select>
+
+            <label for="to-unit">To:</label>
+            <select id="to-unit"></select>
+
+            <button onclick="convert()">Convert</button>
+            <p id="result"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
