@@ -59,3 +59,39 @@ button {
 button:hover {
     background: #0056b3;
 }
+
+.unit-selection-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px; /* Adjust spacing */
+    width: 100%;
+    margin: 0 auto; /* Centers the row */
+    max-width: 400px; /* Adjust to match input field */
+}
+
+.unit-container {
+    flex: 1;
+    flex-direction: column;
+}
+
+#reverse-button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    font-size: 18px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    transition: background 0.3s ease;
+}
+
+#reverse-button:hover {
+    background-color: #0056b3;
+}
+

@@ -1,71 +1,77 @@
-// Unit conversion factors
-const units = {
-    length: {
-        "Meters": 1,
-        "Kilometers": 0.001,
-        "Centimeters": 100,
-        "Millimeters": 1000,
-        "Miles": 0.000621371,
-        "Yards": 1.09361,
-        "Feet": 3.28084,
-        "Inches": 39.3701
-    },
-    weight: {
-        "Kilograms": 1,
-        "Grams": 1000,
-        "Pounds": 2.20462,
-        "Ounces": 35.274
-    },
-    temperature: {
-        "Celsius": 1,
-        "Fahrenheit": 1,
-        "Kelvin": 1
-    },
-    speed: {
-        "Meters per second": 1,
-        "Kilometers per hour": 3.6,
-        "Miles per hour": 2.23694,
-        "Feet per second": 3.28084,
-        "Knots": 1.94384
-    },
-    area: {
-        "Square meters": 1,
-        "Square kilometers": 0.000001,
-        "Square centimeters": 10000,
-        "Square millimeters": 1000000,
-        "Square miles": 3.861e-7,
-        "Square yards": 1.19599,
-        "Square feet": 10.7639,
-        "Square inches": 1550.003
-    },
-    volume: {
-        "Liters": 1,
-        "Milliliters": 1000,
-        "Cubic meters": 0.001,
-        "Cubic centimeters": 1000,
-        "Cubic inches": 61.0237,
-        "Cubic feet": 0.0353147,
-        "Gallons (US)": 0.264172,
-        "Gallons (UK)": 0.219969
-    }
-};
+let translations = {}; // Stores translation data
+let units = {}; // Stores unit data
+let selectedLang = localStorage.getItem("selectedLanguage") || "en";
+let selectedUnitType = "length"; // Default unit type
 
-// Track the selected unit type (default: Length)
-let selectedUnitType = "length";
+// Load translations dynamically from translations.json
+async function loadTranslations() {
+    try {
+        let response = await fetch("translations.json");
+        if (!response.ok) throw new Error("Failed to load translations.json");
+
+        translations = await response.json();
+        updateUI(); // Update UI after loading translations
+    } catch (error) {
+        console.error("Error loading translations:", error);
+    }
+}
+
+// Load units dynamically from units.json
+async function loadUnits() {
+    try {
+        let response = await fetch("units.json");
+        if (!response.ok) throw new Error("Failed to load units.json");
+
+        let data = await response.json();
+        units = data[selectedLang] || {}; // Load the units for the selected language
+        populateUnits(); // Populate dropdowns after loading units
+    } catch (error) {
+        console.error("Error loading units:", error);
+    }
+}
+
+// Function to update UI elements based on the selected language
+function updateUI() {
+    if (!translations[selectedLang]) return;
+
+    document.querySelector("h2").innerText = translations[selectedLang].title;
+    document.querySelector("label[for='input-value']").innerText = translations[selectedLang].enterValue;
+    document.querySelector("label[for='from-unit']").innerText = translations[selectedLang].from;
+    document.querySelector("label[for='to-unit']").innerText = translations[selectedLang].to;
+    document.querySelector("button").innerText = translations[selectedLang].convert;
+    document.querySelector("label[for='language-selector']").innerText = translations[selectedLang].selectLanguage;
+
+    // Update placeholder text dynamically
+    document.getElementById("input-value").placeholder = translations[selectedLang].placeholder;
+
+    // Update tab labels dynamically
+    document.querySelector(`button[onclick="switchTab('length')"]`).innerText = translations[selectedLang].length;
+    document.querySelector(`button[onclick="switchTab('weight')"]`).innerText = translations[selectedLang].weight;
+    document.querySelector(`button[onclick="switchTab('temperature')"]`).innerText = translations[selectedLang].temperature;
+    document.querySelector(`button[onclick="switchTab('speed')"]`).innerText = translations[selectedLang].speed;
+    document.querySelector(`button[onclick="switchTab('area')"]`).innerText = translations[selectedLang].area;
+    document.querySelector(`button[onclick="switchTab('volume')"]`).innerText = translations[selectedLang].volume;
+}
+
 
 // Function to switch tabs
 function switchTab(unitType) {
     selectedUnitType = unitType;
 
-    // Update active tab styling
+    // Remove active class from all buttons, then add to the selected tab
     document.querySelectorAll(".tab-button").forEach(button => {
         button.classList.remove("active");
     });
     document.querySelector(`button[onclick="switchTab('${unitType}')"]`).classList.add("active");
 
-    // Populate the unit dropdowns based on selected unit type
+    // Populate dropdowns for the new unit type
     populateUnits();
+
+    // Clear the input field and result every time the user switches tabs
+    document.getElementById("input-value").value = "";
+    document.getElementById("result").innerText = "";
 }
+
 
 // Populate unit dropdowns
 function populateUnits() {
@@ -75,15 +81,15 @@ function populateUnits() {
     fromUnit.innerHTML = "";
     toUnit.innerHTML = "";
 
-    // Add default "Make a selection" option
-    let defaultOption1 = new Option("Make a selection", "", true, true);
-    let defaultOption2 = new Option("Make a selection", "", true, true);
+    let defaultOption1 = new Option(translations[selectedLang].makeSelection, "", true, true);
+    let defaultOption2 = new Option(translations[selectedLang].makeSelection, "", true, true);
     defaultOption1.disabled = true;
     defaultOption2.disabled = true;
     fromUnit.add(defaultOption1);
     toUnit.add(defaultOption2);
 
-    Object.keys(units[selectedUnitType]).forEach(unit => {
+    // Populate dropdowns with translated unit names
+    Object.keys(units[selectedUnitType] || {}).forEach(unit => {
         let option1 = new Option(unit, unit);
         let option2 = new Option(unit, unit);
         fromUnit.add(option1);
@@ -91,15 +97,14 @@ function populateUnits() {
     });
 }
 
-// Conversion logic
+// Function to perform conversion
 function convert() {
     let inputValue = parseFloat(document.getElementById("input-value").value);
     let fromUnit = document.getElementById("from-unit").value;
     let toUnit = document.getElementById("to-unit").value;
 
-    // Prevent conversion if user hasn't selected valid units
     if (fromUnit === "" || toUnit === "") {
-        document.getElementById("result").innerText = "Please select both units.";
+        document.getElementById("result").innerText = translations[selectedLang].makeSelection;
         return;
     }
 
@@ -109,17 +114,20 @@ function convert() {
     }
 
     let result;
-
+    
     if (selectedUnitType === "temperature") {
         result = convertTemperature(inputValue, fromUnit, toUnit);
     } else {
         result = (inputValue / units[selectedUnitType][fromUnit]) * units[selectedUnitType][toUnit];
     }
 
-    document.getElementById("result").innerText = `Result: ${result.toFixed(2)} ${toUnit}`;
+    // Determine how many decimals to display dynamically
+    let formattedResult = result % 1 === 0 ? result.toFixed(0) : result.toFixed(4);
+
+    document.getElementById("result").innerText = `${translations[selectedLang].result} ${formattedResult} ${toUnit}`;
 }
 
-// Temperature conversion
+// Temperature conversion logic
 function convertTemperature(value, from, to) {
     if (from === to) return value;
 
@@ -131,5 +139,31 @@ function convertTemperature(value, from, to) {
     if (from === "Kelvin" && to === "Fahrenheit") return (value - 273.15) * 9 / 5 + 32;
 }
 
-// Initialize unit options on page load
-populateUnits();
+// Function to change language and reload translations
+async function changeLanguage() {
+    selectedLang = document.getElementById("language-selector").value;
+    localStorage.setItem("selectedLanguage", selectedLang);
+
+    await loadTranslations(); // Reload translations
+    await loadUnits(); // Reload units for the selected language
+    updateUI();
+}
+
+function reverseUnits() {
+    let fromUnit = document.getElementById("from-unit");
+    let toUnit = document.getElementById("to-unit");
+
+    // Swap values
+    let tempValue = fromUnit.value;
+    fromUnit.value = toUnit.value;
+    toUnit.value = tempValue;
+}
+
+// Load everything on page load
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadTranslations(); // Load translations before UI updates
+    await loadUnits(); // Load units before populating dropdowns
+    document.getElementById("language-selector").value = selectedLang;
+    updateUI();
+});
+

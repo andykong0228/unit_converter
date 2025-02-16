@@ -1,0 +1,90 @@
+{
+    "en": {
+        "length": {
+            "Meters": 1,
+            "Kilometers": 0.001,
+            "Centimeters": 100,
+            "Millimeters": 1000,
+            "Miles": 0.000621371,
+            "Yards": 1.09361,
+            "Feet": 3.28084,
+            "Inches": 39.3701
+        },
+        "weight": {
+            "Kilograms": 1,
+            "Grams": 1000,
+            "Pounds": 2.20462,
+            "Ounces": 35.274
+        },
+        "temperature": {
+            "Celsius": 1,
+            "Fahrenheit": 1,
+            "Kelvin": 1
+        },
+        "speed": {
+            "Meters per second": 1,
+            "Kilometers per hour": 3.6,
+            "Miles per hour": 2.23694,
+            "Feet per second": 3.28084,
+            "Knots": 1.94384
+        },
+        "area": {
+            "Square meters": 1,
+            "Square kilometers": 0.000001,
+            "Square miles": 3.861e-7,
+            "Square yards": 1.19599,
+            "Square feet": 10.7639
+        },
+        "volume": {
+            "Liters": 1,
+            "Milliliters": 1000,
+            "Cubic meters": 0.001,
+            "Cubic centimeters": 1000,
+            "Gallons (US)": 0.264172
+        }
+    },
+    "zh": {
+        "length": {
+            "米": 1,
+            "千米": 0.001,
+            "厘米": 100,
+            "毫米": 1000,
+            "英里": 0.000621371,
+            "码": 1.09361,
+            "英尺": 3.28084,
+            "英寸": 39.3701
+        },
+        "weight": {
+            "千克": 1,
+            "克": 1000,
+            "磅": 2.20462,
+            "盎司": 35.274
+        },
+        "temperature": {
+            "摄氏度": 1,
+            "华氏度": 1,
+            "开尔文": 1
+        },
+        "speed": {
+            "米/秒": 1,
+            "公里/小时": 3.6,
+            "英里/小时": 2.23694,
+            "英尺/秒": 3.28084,
+            "节": 1.94384
+        },
+        "area": {
+            "平方米": 1,
+            "平方千米": 0.000001,
+            "平方英里": 3.861e-7,
+            "平方码": 1.19599,
+            "平方英尺": 10.7639
+        },
+        "volume": {
+            "升": 1,
+            "毫升": 1000,
+            "立方米": 0.001,
+            "立方厘米": 1000,
+            "美制加仑": 0.264172
+        }
+    }
+}

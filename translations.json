@@ -1,0 +1,36 @@
+{
+    "en": {
+        "title": "Unit Converter",
+        "selectLanguage": "🌍 Select Language:",
+        "length": "Length",
+        "weight": "Weight",
+        "temperature": "Temperature",
+        "speed": "Speed",
+        "area": "Area",
+        "volume": "Volume",
+        "enterValue": "Enter Value:",
+        "placeholder": "Enter value",
+        "from": "From:",
+        "to": "To:",
+        "convert": "Convert",
+        "makeSelection": "Make a selection",
+        "result": "Result: "
+    },
+    "zh": {
+        "title": "单位转换器",
+        "selectLanguage": "🌍 选择语言:",
+        "length": "长度",
+        "weight": "重量",
+        "temperature": "温度",
+        "speed": "速度",
+        "area": "面积",
+        "volume": "体积",
+        "enterValue": "输入数值:",
+        "placeholder": "输入值",
+        "from": "从:",
+        "to": "到:",
+        "convert": "转换",
+        "makeSelection": "请选择",
+        "result": "结果: "
+    }
+}

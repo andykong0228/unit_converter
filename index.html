@@ -10,6 +10,13 @@
     <div class="container">
         <h2>Unit Converter</h2>
 
+        <!-- Language Selector -->
+        <label for="language-selector">🌍 Select Language:</label>
+        <select id="language-selector" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="zh">简体中文</option>
+        </select>
+
         <!-- Tab Buttons -->
         <div class="tabs">
             <button class="tab-button active" onclick="switchTab('length')">Length</button>
@@ -25,11 +32,19 @@
             <label for="input-value">Enter Value:</label>
             <input type="number" id="input-value" placeholder="Enter value">
 
-            <label for="from-unit">From:</label>
-            <select id="from-unit"></select>
-
-            <label for="to-unit">To:</label>
-            <select id="to-unit"></select>
+            <div class="unit-selection-row">
+                <div class="unit-container">
+                    <label for="from-unit">From:</label>
+                    <select id="from-unit"></select>
+                </div>
+            
+                <button id="reverse-button" onclick="reverseUnits()">🔄</button>
+            
+                <div class="unit-container">
+                    <label for="to-unit">To:</label>
+                    <select id="to-unit"></select>
+                </div>
+            </div>                                            
 
             <button onclick="convert()">Convert</button>
             <p id="result"></p>
