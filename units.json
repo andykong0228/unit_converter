@@ -31,9 +31,9 @@
         "area": {
             "Square meters": 1,
             "Square kilometers": 0.000001,
-            "Square miles": 3.861e-7,
             "Square yards": 1.19599,
-            "Square feet": 10.7639
+            "Square feet": 10.7639,
+            "Acres": 0.000247105
         },
         "volume": {
             "Liters": 1,
@@ -75,9 +75,9 @@
         "area": {
             "平方米": 1,
             "平方千米": 0.000001,
-            "平方英里": 3.861e-7,
             "平方码": 1.19599,
-            "平方英尺": 10.7639
+            "平方英尺": 10.7639,
+            "英亩": 0.000247105
         },
         "volume": {
             "升": 1,
