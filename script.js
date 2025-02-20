@@ -3,6 +3,19 @@ let units = {}; // Stores unit data
 let selectedLang = localStorage.getItem("selectedLanguage") || "en";
 let selectedUnitType = "length"; // Default unit type
 
+let currencyData = {};
+
+async function loadCurrencies() {
+    try {
+        let response = await fetch("currencies.json");
+        if (!response.ok) throw new Error("Failed to load currencies.json");
+
+        currencyData = await response.json();
+    } catch (error) {
+        console.error("Error loading currencies:", error);
+    }
+}
+
 // Load translations dynamically from translations.json
 async function loadTranslations() {
     try {
@@ -30,6 +43,28 @@ async function loadUnits() {
     }
 }
 
+const currencyAPIKey = "2068983c972db65eaebd7c9f"; // Replace with your actual API key
+
+async function loadCurrencyRates() {
+    let lastFetchTime = localStorage.getItem("lastCurrencyFetch");
+    let currentTime = Date.now();
+    let timeDifference = (currentTime - lastFetchTime) / (1000 * 60 * 60); // Convert milliseconds to hours
+
+    // Only fetch new rates if 12+ hours have passed since the last API call
+    if (!lastFetchTime || timeDifference >= 12) {
+        try {
+            let response = await fetch(`https://v6.exchangerate-api.com/v6/${currencyAPIKey}/latest/USD`);
+            if (!response.ok) throw new Error("Failed to load currency rates");
+
+            let data = await response.json();
+            localStorage.setItem("currencyRates", JSON.stringify(data.conversion_rates));
+            localStorage.setItem("lastCurrencyFetch", currentTime); // Update last fetch time
+        } catch (error) {
+            console.error("Error fetching currency rates:", error);
+        }
+    }
+}
+
 // Function to update UI elements based on the selected language
 function updateUI() {
     if (!translations[selectedLang]) return;
@@ -53,28 +88,27 @@ function updateUI() {
     document.querySelector(`button[onclick="switchTab('volume')"]`).innerText = translations[selectedLang].volume;
 }
 
-
 // Function to switch tabs
 function switchTab(unitType) {
     selectedUnitType = unitType;
 
-    // Remove active class from all buttons, then add to the selected tab
     document.querySelectorAll(".tab-button").forEach(button => {
         button.classList.remove("active");
     });
     document.querySelector(`button[onclick="switchTab('${unitType}')"]`).classList.add("active");
 
-    // Populate dropdowns for the new unit type
     populateUnits();
 
-    // Clear the input field and result every time the user switches tabs
-    document.getElementById("input-value").value = "";
-    document.getElementById("result").innerText = "";
+    // Load exchange rates ONLY IF the user selects the currency tab
+    if (unitType === "currency") {
+        loadCurrencyRates(); // Calls API only if needed
+    }
+
+    document.getElementById("result").innerText = ""; // Clear result when switching
 }
 
-
 // Populate unit dropdowns
-function populateUnits() {
+async function populateUnits() {
     let fromUnit = document.getElementById("from-unit");
     let toUnit = document.getElementById("to-unit");
 
@@ -88,13 +122,27 @@ function populateUnits() {
     fromUnit.add(defaultOption1);
     toUnit.add(defaultOption2);
 
-    // Populate dropdowns with translated unit names
-    Object.keys(units[selectedUnitType] || {}).forEach(unit => {
-        let option1 = new Option(unit, unit);
-        let option2 = new Option(unit, unit);
-        fromUnit.add(option1);
-        toUnit.add(option2);
-    });
+    if (selectedUnitType === "currency") {
+        await loadCurrencies(); // Load currency data before populating
+        let rates = JSON.parse(localStorage.getItem("currencyRates")) || {};
+
+        Object.keys(currencyData).forEach(currency => {
+            if (rates[currency]) { // Only add currencies that exist in the API response
+                let currencyDisplay = `${currency} - ${currencyData[currency].name} (${currencyData[currency].symbol})`;
+                let option1 = new Option(currencyDisplay, currency);
+                let option2 = new Option(currencyDisplay, currency);
+                fromUnit.add(option1);
+                toUnit.add(option2);
+            }
+        });
+    } else {
+        Object.keys(units[selectedUnitType] || {}).forEach(unit => {
+            let option1 = new Option(unit, unit);
+            let option2 = new Option(unit, unit);
+            fromUnit.add(option1);
+            toUnit.add(option2);
+        });
+    }
 }
 
 // Function to perform conversion
@@ -103,7 +151,7 @@ function convert() {
     let fromUnit = document.getElementById("from-unit").value;
     let toUnit = document.getElementById("to-unit").value;
 
-    if (fromUnit === "" || toUnit === "") {
+    if (!fromUnit || !toUnit) {
         document.getElementById("result").innerText = translations[selectedLang].makeSelection;
         return;
     }
@@ -114,17 +162,32 @@ function convert() {
     }
 
     let result;
-    
-    if (selectedUnitType === "temperature") {
+
+    if (selectedUnitType === "currency") {
+        let rates = JSON.parse(localStorage.getItem("currencyRates")) || {};
+        if (!rates[fromUnit] || !rates[toUnit]) {
+            document.getElementById("result").innerText = "Exchange rates unavailable.";
+            return;
+        }
+
+        result = (inputValue / rates[fromUnit]) * rates[toUnit];
+
+        // 🔹 FIX: Replace currencyNames with currencyData
+        let fromCurrencyName = currencyData[fromUnit]?.name || fromUnit;
+        let toCurrencyName = currencyData[toUnit]?.name || toUnit;
+
+        document.getElementById("result").innerText = 
+            `${inputValue} ${fromCurrencyName} is equal to ${result.toFixed(2)} ${toCurrencyName}`;
+    } else if (selectedUnitType === "temperature") {
         result = convertTemperature(inputValue, fromUnit, toUnit);
     } else {
         result = (inputValue / units[selectedUnitType][fromUnit]) * units[selectedUnitType][toUnit];
     }
 
-    // Determine how many decimals to display dynamically
-    let formattedResult = result % 1 === 0 ? result.toFixed(0) : result.toFixed(4);
-
-    document.getElementById("result").innerText = `${translations[selectedLang].result} ${formattedResult} ${toUnit}`;
+    if (selectedUnitType !== "currency") {
+        let formattedResult = result % 1 === 0 ? result.toFixed(0) : result.toFixed(4);
+        document.getElementById("result").innerText = `${translations[selectedLang].result} ${formattedResult} ${toUnit}`;
+    }
 }
 
 // Temperature conversion logic
@@ -137,6 +200,32 @@ function convertTemperature(value, from, to) {
     if (from === "Fahrenheit" && to === "Kelvin") return (value - 32) * 5 / 9 + 273.15;
     if (from === "Kelvin" && to === "Celsius") return value - 273.15;
     if (from === "Kelvin" && to === "Fahrenheit") return (value - 273.15) * 9 / 5 + 32;
+}
+
+function convertCurrency() {
+    let amount = parseFloat(document.getElementById("input-value").value);
+    let fromCurrency = document.getElementById("from-unit").value;
+    let toCurrency = document.getElementById("to-unit").value;
+
+    if (!amount || !fromCurrency || !toCurrency) {
+        document.getElementById("result").innerText = "Please enter a valid amount and select currencies.";
+        return;
+    }
+
+    let rates = JSON.parse(localStorage.getItem("currencyRates")) || {};
+
+    if (!rates[fromCurrency] || !rates[toCurrency]) {
+        document.getElementById("result").innerText = "Exchange rates unavailable. Try again later.";
+        return;
+    }
+
+    let convertedAmount = (amount / rates[fromCurrency]) * rates[toCurrency];
+
+    let fromCurrencyName = currencyData[fromCurrency]?.name || fromCurrency;
+    let toCurrencyName = currencyData[toCurrency]?.name || toCurrency;
+
+    document.getElementById("result").innerText = 
+        `${amount} ${fromCurrencyName} is equal to ${convertedAmount.toFixed(2)} ${toCurrencyName}`;
 }
 
 // Function to change language and reload translations
@@ -153,7 +242,6 @@ function reverseUnits() {
     let fromUnit = document.getElementById("from-unit");
     let toUnit = document.getElementById("to-unit");
 
-    // Swap values
     let tempValue = fromUnit.value;
     fromUnit.value = toUnit.value;
     toUnit.value = tempValue;

@@ -14,7 +14,13 @@
         "to": "To:",
         "convert": "Convert",
         "makeSelection": "Make a selection",
-        "result": "Result: "
+        "result": "Result: ",
+        "currency": "Currency",
+        "convertCurrency": "Convert Currency",
+        "fromCurrency": "From Currency:",
+        "toCurrency": "To Currency:",
+        "amount": "Enter Amount:",
+        "exchangeRate": "Exchange Rate:"
     },
     "zh": {
         "title": "单位转换器",
@@ -31,6 +37,12 @@
         "to": "到:",
         "convert": "转换",
         "makeSelection": "请选择",
-        "result": "结果: "
+        "result": "结果: ",
+        "currency": "货币",
+        "convertCurrency": "转换货币",
+        "fromCurrency": "从货币:",
+        "toCurrency": "到货币:",
+        "amount": "输入金额:",
+        "exchangeRate": "汇率:"
     }
 }

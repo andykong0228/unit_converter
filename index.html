@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unit Converter</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="container">
         <h2>Unit Converter</h2>
@@ -25,6 +27,7 @@
             <button class="tab-button" onclick="switchTab('speed')">Speed</button>
             <button class="tab-button" onclick="switchTab('area')">Area</button>
             <button class="tab-button" onclick="switchTab('volume')">Volume</button>
+            <button class="tab-button" onclick="switchTab('currency')">Currency</button>
         </div>
 
         <!-- Conversion Form -->
@@ -37,20 +40,22 @@
                     <label for="from-unit">From:</label>
                     <select id="from-unit"></select>
                 </div>
-            
+
                 <button id="reverse-button" onclick="reverseUnits()">🔄</button>
-            
+
                 <div class="unit-container">
                     <label for="to-unit">To:</label>
                     <select id="to-unit"></select>
                 </div>
-            </div>                                            
+            </div>
 
-            <button onclick="convert()">Convert</button>
+            <button class="convert-button" onclick="convert()">Convert</button>
+
             <p id="result"></p>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
