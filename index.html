@@ -15,9 +15,12 @@
         <!-- Language Selector -->
         <label for="language-selector">🌍 Select Language:</label>
         <select id="language-selector" onchange="changeLanguage()">
-            <option value="en">English</option>
-            <option value="zh">简体中文</option>
-        </select>
+            <option value="en">🇺🇸 English</option>
+            <option value="zh">🇨🇳 简体中文 (Simplified Chinese)</option>
+            <option value="zh-TW">🇹🇼 繁體中文 (Traditional Chinese)</option>
+            <option value="ja">🇯🇵 日本語 (Japanese)</option>
+            <option value="es">🇪🇸 Español (Spanish)</option>
+        </select>        
 
         <!-- Tab Buttons -->
         <div class="tabs">
@@ -33,7 +36,8 @@
         <!-- Conversion Form -->
         <div id="conversion-section">
             <label for="input-value">Enter Value:</label>
-            <input type="number" id="input-value" placeholder="Enter value">
+            <input type="number" id="input-value" value="1" placeholder="Enter value">
+
 
             <div class="unit-selection-row">
                 <div class="unit-container">

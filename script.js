@@ -86,6 +86,7 @@ function updateUI() {
     document.querySelector(`button[onclick="switchTab('speed')"]`).innerText = translations[selectedLang].speed;
     document.querySelector(`button[onclick="switchTab('area')"]`).innerText = translations[selectedLang].area;
     document.querySelector(`button[onclick="switchTab('volume')"]`).innerText = translations[selectedLang].volume;
+    document.querySelector(`button[onclick="switchTab('currency')"]`).innerText = translations[selectedLang].currency;
 }
 
 // Function to switch tabs
@@ -123,22 +124,36 @@ async function populateUnits() {
     toUnit.add(defaultOption2);
 
     if (selectedUnitType === "currency") {
-        await loadCurrencies(); // Load currency data before populating
-        let rates = JSON.parse(localStorage.getItem("currencyRates")) || {};
+        // 🔹 Ensure currency data is properly loaded
+        if (!currencyData || Object.keys(currencyData).length === 0) {
+            console.error("Currency data is not loaded.");
+            return;
+        }
 
-        Object.keys(currencyData).forEach(currency => {
-            if (rates[currency]) { // Only add currencies that exist in the API response
-                let currencyDisplay = `${currency} - ${currencyData[currency].name} (${currencyData[currency].symbol})`;
-                let option1 = new Option(currencyDisplay, currency);
-                let option2 = new Option(currencyDisplay, currency);
-                fromUnit.add(option1);
-                toUnit.add(option2);
-            }
+        Object.keys(currencyData).forEach(currencyCode => {
+            let currencyInfo = currencyData[currencyCode];
+            if (!currencyInfo || !currencyInfo.name) return;
+
+            let currencyName = currencyInfo.name[selectedLang] || currencyInfo.name["en"];
+            let currencySymbol = currencyInfo.symbol;
+            let displayText = `${currencyCode} - ${currencyName} (${currencySymbol})`;
+
+            let option1 = new Option(displayText, currencyCode);
+            let option2 = new Option(displayText, currencyCode);
+            fromUnit.add(option1);
+            toUnit.add(option2);
         });
     } else {
-        Object.keys(units[selectedUnitType] || {}).forEach(unit => {
-            let option1 = new Option(unit, unit);
-            let option2 = new Option(unit, unit);
+        // 🔹 Ensure unit data is properly loaded
+        if (!units[selectedUnitType] || Object.keys(units[selectedUnitType]).length === 0) {
+            console.error("Unit data is not loaded for", selectedUnitType);
+            return;
+        }
+
+        Object.keys(units[selectedUnitType]).forEach(unit => {
+            let unitName = translations[selectedLang]?.units?.[selectedUnitType]?.[unit] || unit;
+            let option1 = new Option(unitName, unit);
+            let option2 = new Option(unitName, unit);
             fromUnit.add(option1);
             toUnit.add(option2);
         });
@@ -172,12 +187,19 @@ function convert() {
 
         result = (inputValue / rates[fromUnit]) * rates[toUnit];
 
-        // 🔹 FIX: Replace currencyNames with currencyData
-        let fromCurrencyName = currencyData[fromUnit]?.name || fromUnit;
-        let toCurrencyName = currencyData[toUnit]?.name || toUnit;
+        let fromCurrencyName = currencyData[fromUnit]?.name[selectedLang] || currencyData[fromUnit]?.name["en"] || fromUnit;
+        let toCurrencyName = currencyData[toUnit]?.name[selectedLang] || currencyData[toUnit]?.name["en"] || toUnit;
+        let isEqualToText = translations[selectedLang]?.isEqualTo || translations["en"].isEqualTo;
 
-        document.getElementById("result").innerText = 
-            `${inputValue} ${fromCurrencyName} is equal to ${result.toFixed(2)} ${toCurrencyName}`;
+        // 🔹 Get Current Date, Time, and Timezone
+        let now = new Date();
+        let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone; // Get system timezone
+        let timestamp = now.toLocaleString(selectedLang, { dateStyle: "short", timeStyle: "short" });
+
+        document.getElementById("result").innerHTML = 
+            `${inputValue} ${fromCurrencyName} ${isEqualToText} ${result.toFixed(2)} ${toCurrencyName} <br>
+            <small>${timestamp} (${timezone})</small>`;
+        return;
     } else if (selectedUnitType === "temperature") {
         result = convertTemperature(inputValue, fromUnit, toUnit);
     } else {
@@ -185,21 +207,79 @@ function convert() {
     }
 
     if (selectedUnitType !== "currency") {
-        let formattedResult = result % 1 === 0 ? result.toFixed(0) : result.toFixed(4);
+        let formattedResult = result % 1 === 0 ? result.toFixed(0) : result.toFixed(2);
         document.getElementById("result").innerText = `${translations[selectedLang].result} ${formattedResult} ${toUnit}`;
     }
 }
 
 // Temperature conversion logic
-function convertTemperature(value, from, to) {
-    if (from === to) return value;
+// function convertTemperature(value) {
+//     if (!units || !units[selectedLang] || !units[selectedLang].temperature || !units["en"].temperature) {
+//         console.error("Temperature unit data is missing.");
+//         return NaN; // Prevents breaking the app
+//     }
 
-    if (from === "Celsius" && to === "Fahrenheit") return (value * 9 / 5) + 32;
-    if (from === "Celsius" && to === "Kelvin") return value + 273.15;
-    if (from === "Fahrenheit" && to === "Celsius") return (value - 32) * 5 / 9;
-    if (from === "Fahrenheit" && to === "Kelvin") return (value - 32) * 5 / 9 + 273.15;
-    if (from === "Kelvin" && to === "Celsius") return value - 273.15;
-    if (from === "Kelvin" && to === "Fahrenheit") return (value - 273.15) * 9 / 5 + 32;
+//     let tempUnits = units[selectedLang].temperature; // Get translated temperature units
+//     let tempUnitsEn = units["en"].temperature; // Get English temperature units
+
+//     // 🔹 Fetch selected units directly from index.html dropdowns
+//     let fromUnit = document.getElementById("from-unit").value;
+//     let toUnit = document.getElementById("to-unit").value;
+
+//     // 🔹 Map translated unit names to their English equivalents
+//     let fromEnglish = Object.keys(tempUnitsEn).find(key => tempUnits[key] === fromUnit) || fromUnit;
+//     let toEnglish = Object.keys(tempUnitsEn).find(key => tempUnits[key] === toUnit) || toUnit;
+
+//     if (fromEnglish === toEnglish) return value; // If both are the same, return the input value
+
+//     // 🔹 Perform temperature conversion
+//     if (fromEnglish === "Celsius" && toEnglish === "Fahrenheit") return (value * 9 / 5) + 32;
+//     if (fromEnglish === "Celsius" && toEnglish === "Kelvin") return value + 273.15;
+//     if (fromEnglish === "Fahrenheit" && toEnglish === "Celsius") return (value - 32) * 5 / 9;
+//     if (fromEnglish === "Fahrenheit" && toEnglish === "Kelvin") return (value - 32) * 5 / 9 + 273.15;
+//     if (fromEnglish === "Kelvin" && toEnglish === "Celsius") return value - 273.15;
+//     if (fromEnglish === "Kelvin" && toEnglish === "Fahrenheit") return (value - 273.15) * 9 / 5 + 32;
+
+//     return NaN; // Ensure a valid number is always returned
+// }
+function convertTemperature(value) {
+    // 🔹 Get user-selected units
+    let fromUnit = document.getElementById("from-unit").value;
+    let toUnit = document.getElementById("to-unit").value;
+
+    // 🔹 Ensure `units.json` is fully loaded and temperature data exists
+    if (!units || !units[selectedLang] || !units[selectedLang].temperature || !units["en"] || !units["en"].temperature) {
+        console.error("Temperature unit data is missing.");
+        return NaN;
+    }
+
+    let tempUnits = units[selectedLang].temperature; // 🔹 Get temperature units in the selected language
+    let tempUnitsEn = units["en"].temperature; // 🔹 Get temperature units in English
+
+    console.log("Selected Language:", selectedLang);
+    console.log("Available Temperature Units:", tempUnits);
+    console.log("Available English Temperature Units:", tempUnitsEn);
+    console.log("From Unit:", fromUnit);
+    console.log("To Unit:", toUnit);
+
+    // 🔹 Convert translated unit names to English
+    let fromEnglish = Object.keys(tempUnitsEn).find(key => tempUnits[selectedLang].temperature[key] === fromUnit) || fromUnit;
+    let toEnglish = Object.keys(tempUnitsEn).find(key => tempUnits[selectedLang].temperature[key] === toUnit) || toUnit;
+
+    console.log("Mapped From Unit to English:", fromEnglish);
+    console.log("Mapped To Unit to English:", toEnglish);
+
+    if (fromEnglish === toEnglish) return value; // If both are the same, return the input value
+
+    // 🔹 Perform temperature conversion
+    if (fromEnglish === "Celsius" && toEnglish === "Fahrenheit") return (value * 9 / 5) + 32;
+    if (fromEnglish === "Celsius" && toEnglish === "Kelvin") return value + 273.15;
+    if (fromEnglish === "Fahrenheit" && toEnglish === "Celsius") return (value - 32) * 5 / 9;
+    if (fromEnglish === "Fahrenheit" && toEnglish === "Kelvin") return (value - 32) * 5 / 9 + 273.15;
+    if (fromEnglish === "Kelvin" && toEnglish === "Celsius") return value - 273.15;
+    if (fromEnglish === "Kelvin" && toEnglish === "Fahrenheit") return (value - 273.15) * 9 / 5 + 32;
+
+    return NaN; // Ensure a valid number is always returned
 }
 
 function convertCurrency() {
@@ -249,9 +329,11 @@ function reverseUnits() {
 
 // Load everything on page load
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadTranslations(); // Load translations before UI updates
-    await loadUnits(); // Load units before populating dropdowns
+    await loadTranslations();
+    await loadUnits(); // 🔹 Ensure unit data is loaded
+    await loadCurrencies();
     document.getElementById("language-selector").value = selectedLang;
     updateUI();
+    populateUnits();
 });
 
