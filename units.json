@@ -17,9 +17,9 @@
             "Ounces": 35.274
         },
         "temperature": {
-            "Celsius": 1,
-            "Fahrenheit": 1,
-            "Kelvin": 1
+            "Celsius": {"factor": 1, "offset": 0},
+            "Fahrenheit": {"factor": 1.8, "offset": 32},
+            "Kelvin": {"factor": 1, "offset": 273.15}
         },
         "speed": {
             "Meters per second": 1,
@@ -61,9 +61,9 @@
             "盎司": 35.274
         },
         "temperature": {
-            "摄氏度": 1,
-            "华氏度": 1,
-            "开尔文": 1
+            "摄氏度": {"factor": 1, "offset": 0},
+            "华氏度": {"factor": 1.8, "offset": 32},
+            "开尔文": {"factor": 1, "offset": 273.15}
         },
         "speed": {
             "米/秒": 1,
@@ -105,9 +105,9 @@
             "盎司": 35.274
         },
         "temperature": {
-            "攝氏度": 1,
-            "華氏度": 1,
-            "開氏度": 1
+            "攝氏度": {"factor": 1, "offset": 0},
+            "華氏度": {"factor": 1.8, "offset": 32},
+            "開氏度": {"factor": 1, "offset": 273.15}
         },
         "speed": {
             "米/秒": 1,
@@ -149,9 +149,9 @@
             "オンス": 35.274
         },
         "temperature": {
-            "摂氏": 1,
-            "華氏": 1,
-            "ケルビン": 1
+            "摂氏": {"factor": 1, "offset": 0},
+            "華氏": {"factor": 1.8, "offset": 32},
+            "ケルビン": {"factor": 1, "offset": 273.15}
         },
         "speed": {
             "メートル毎秒": 1,
@@ -193,9 +193,9 @@
             "Onzas": 35.274
         },
         "temperature": {
-            "Celsius": 1,
-            "Fahrenheit": 1,
-            "Kelvin": 1
+            "Celsius": {"factor": 1, "offset": 0},
+            "Fahrenheit": {"factor": 1.8, "offset": 32},
+            "Kelvin": {"factor": 1, "offset": 273.15}
         },
         "speed": {
             "Metros por segundo": 1,
